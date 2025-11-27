@@ -1,10 +1,29 @@
-function App() {
+import { Routes, Route, Navigate } from "react-router-dom";
+import Home from "./pages/Home";
+import AuthPage from "./pages/AuthPage";
+import { useAuth } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+export default function App() {
+  const { user } = useAuth();
 
   return (
-    <div className="bg-blue-500 text-white p-6 rounded-xl">
-      Tailwind 動作テスト OK！
-    </div>
-  )
-}
+    <Routes>
+      
+      <Route
+        path="/"
+        element={user ? <Navigate to="/home" /> : <AuthPage />}
+      />
 
-export default App
+      
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
+}
