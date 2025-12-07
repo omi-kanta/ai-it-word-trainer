@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import Layout from "./components/layout/Layout";
 import Home from "./pages/Home";
 import AuthPage from "./pages/AuthPage";
 import { useAuth } from "./context/AuthContext";
@@ -9,21 +10,20 @@ export default function App() {
 
   return (
     <Routes>
-      
-      <Route
-        path="/"
-        element={user ? <Navigate to="/home" /> : <AuthPage />}
-      />
-
-      
-      <Route
-        path="/home"
-        element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        }
-      />
+      <Route element={<Layout />}>
+        <Route
+          path="/"
+          element={user ? <Navigate to="/home" /> : <AuthPage />}
+        />
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+      </Route>
     </Routes>
   );
 }

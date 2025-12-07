@@ -6,8 +6,7 @@ export default function AuthPage() {
   const [mode, setMode] = useState("login"); 
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-
+    <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
       <div className="bg-white p-8 rounded-xl w-full max-w-sm shadow">
         <div className="flex gap-4 mb-6">
           <button
@@ -28,7 +27,6 @@ export default function AuthPage() {
             新規登録
           </button>
         </div>
-
         {mode === "login" ? <Login /> : <SignUp />}
       </div>
     </div>
