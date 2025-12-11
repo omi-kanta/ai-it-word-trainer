@@ -1,5 +1,6 @@
 import { signOut } from "firebase/auth";
 import { auth } from "../lib/firebase";
+import { Button } from "../components/ui/Button";
 
 export default function Home() {
 
@@ -15,12 +16,11 @@ export default function Home() {
           AIを使ってIT用語をインプットしながら、クイズでアウトプットする学習アプリです。
         </p>
       </div>
-      <button
+      <Button
         onClick={handleLogout}
-        className="mt-4 bg-red-500 text-white px-4 py-2 rounded w-full text-sm hover:bg-red-600"
       >
         ログアウト
-      </button>
+      </Button>
     </div>
   );
 }
