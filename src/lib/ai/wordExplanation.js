@@ -10,6 +10,8 @@ export async function generateExplanation(word) {
   - 日本語で説明すること
   - 具体例を交えて説明すること
   - 箇条書きでポイントを整理する
+  - はい、承知いたしました、などの不要な前置きはしない
+  - 読みやすい文章にしてください
   `.trim();
 
   return await callGemini(prompt);  
