@@ -13,7 +13,7 @@ export default function Layout() {
       {isLoggedIn && <Header />}
 
       {/* メインコンテンツ領域 */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
+      <div className="flex-1 flex justify-center">
         <div className="w-full max-w-md">
           {!isLoggedIn && (
             <div className="text-center mb-8">
@@ -32,9 +32,9 @@ export default function Layout() {
         </div>
       </div>
       {/* フッター */}
-      {/* <footer className="py-4 text-center text-xs text-gray-600">
-        &copy; {new Date().getFullYear()} AI IT単語トレーナー. All rights reserved.
-      </footer> */}
+      <footer className="py-4 text-center text-xs text-gray-600">
+        &copy; {new Date().getFullYear()} AI IT学習アプリ. All rights reserved.
+      </footer>
     </div>
   );
 }
