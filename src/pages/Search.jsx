@@ -11,6 +11,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
+import { Button } from "../components/ui/Button";
 
 export default function Search() {
   const [word, setWord] = useState("");          
@@ -89,13 +90,12 @@ export default function Search() {
         onChange={(e) => setWord(e.target.value)}
       />
 
-      <button
+      <Button
         onClick={handleGenerate}
-        className="bg-blue-500 text-white w-full py-2 rounded hover:bg-blue-600"
         disabled={loading}
       >
         {loading ? "生成中..." : "AIで説明を生成する"}
-      </button>
+      </Button>
 
       {showResult && result && (
         <div className="mt-6 bg-gray-100 p-4 rounded relative">
