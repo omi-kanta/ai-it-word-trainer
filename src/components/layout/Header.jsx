@@ -13,17 +13,26 @@ export default function Header() {
               IT学習アプリ
             </span>
           </div>
-          <nav className="hidden md:flex items-center gap-3">
-            <Link to="/home" className="px-3 py-1 text-sm text-gray-700 hover:text-blue-600">
-              Home
+          <nav className="flex items-center gap-2 text-xs sm:text-sm">
+            <Link
+              to="/home"
+              className="px-2 py-1 sm:px-3 text-gray-700 hover:text-blue-600"
+            >
+              ホーム
             </Link>
-            <Link to="/search" className="px-3 py-1 text-sm text-gray-700 hover:text-blue-600">
-              Search
+            <Link
+              to="/search"
+              className="px-2 py-1 sm:px-3 text-gray-700 hover:text-blue-600"
+            >
+              検索
             </Link>
-            <Link to="/quiz" className="px-3 py-1 text-sm text-gray-700 hover:text-blue-600">
-              Quiz
+            <Link
+              to="/quiz"
+              className="px-2 py-1 sm:px-3 text-gray-700 hover:text-blue-600"
+            >
+              クイズ
             </Link>
-          </nav> 
+          </nav>
         </div>
       </div>
     </header>

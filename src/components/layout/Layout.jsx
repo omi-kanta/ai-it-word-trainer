@@ -9,10 +9,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col">
-      {/* 🔹 ログイン済みのときだけヘッダーを出す */}
       {isLoggedIn && <Header />}
-
-      {/* メインコンテンツ領域 */}
       <div className="flex-1 flex justify-center">
         <div className="w-full max-w-md">
           {!isLoggedIn && (
@@ -31,7 +28,7 @@ export default function Layout() {
           <Outlet />
         </div>
       </div>
-      {/* フッター */}
+
       <footer className="py-4 text-center text-xs text-gray-600">
         &copy; {new Date().getFullYear()} AI IT学習アプリ. All rights reserved.
       </footer>
