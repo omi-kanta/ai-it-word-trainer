@@ -9,40 +9,54 @@ import {
 } from "firebase/firestore";
 
 /**
- * @param {string | null} userId 
- * @returns {histories: Array, loading: boolean, error: any}
+ * @param {string | null} userId
+ * @returns {{ histories: Array, loading: boolean, error: any }}
  */
 export function useUserWordHistories(userId) {
   const [histories, setHistories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!userId) {
-      setHistories([]); 
-      setLoading(false);
-      setError(null);
-      return;
-    }
+    if (!userId) return;
+
+    let firstSnapshot = true; 
 
     const q = query(
-      collection(db, "userWords"),
+      collection(db, "useWords"),
       where("userId", "==", userId),
-      orderBy("createdAt", "desc")
+      orderBy("created_at", "desc")
     );
 
-const unsubscribe = onSnapshot(q, (snapshot) => {
-  const data = snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-  setHistories(data);
-  setLoading(false);
-  setError(null);
-});
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        if (firstSnapshot) {
+          setLoading(true);
+          setError(null);
+          firstSnapshot = false;
+        }
+
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setHistories(data);
+        setLoading(false);
+      },
+      (e) => {
+        setError(e);
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, [userId]);
 
-  return { histories, loading, error  };
+  return {
+    histories,
+    loading,
+    error,
+  };
 }
