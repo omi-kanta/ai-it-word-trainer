@@ -1,52 +1,28 @@
-import { useState, useEffect } from "react";
-import { auth, db } from "../lib/firebase";
+import { useState } from "react";
+import { auth } from "../lib/firebase";
 import { generateExplanation } from "../lib/ai/wordExplanation";
-import {
-  collection,
-  addDoc,
-  query,
-  where,
-  orderBy,
-  onSnapshot,
-  serverTimestamp,
-} from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/ui/Button";
+import { useUserWordHistories } from "../hooks/useUserWordHistories";
+import { saveUserWord } from "../lib/userWordsRepository";
 
 export default function Search() {
-  const [word, setWord] = useState("");          
-  const [result, setResult] = useState("");      
-  const [showResult, setShowResult] = useState(false); 
-  const [loading, setLoading] = useState(false); 
-  const [histories, setHistories] = useState([]); 
+  const [word, setWord] = useState("");
+  const [result, setResult] = useState("");
+  const [showResult, setShowResult] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // 共通のユーザー情報
   const { user } = useAuth?.() ?? { user: auth.currentUser };
+  const userId = user?.uid ?? null;
 
-  // ログイン中ユーザーの履歴をリアルタイム取得
-  useEffect(() => {
-    if (!user) return;
+  const { 
+    histories = [], 
+    loading: historiesLoading,
+    error 
+  } = useUserWordHistories(userId);
 
-    const q = query(
-      collection(db, "userWords"),
-      where("userId", "==", user.uid),
-      orderBy("createdAt", "desc")
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setHistories(data);
-    });
-
-    return () => unsubscribe();
-  }, [user]);
-
-  // AIで説明を生成してFirestoreに保存
   const handleGenerate = async () => {
-    if (!word || !user) return;
+    if (!word || !userId) return;
 
     setLoading(true);
     setResult("");
@@ -61,12 +37,7 @@ export default function Search() {
     if (!explanation || explanation.startsWith("エラー")) return;
 
     try {
-      await addDoc(collection(db, "userWords"), {
-        userId: user.uid,
-        word,
-        explanation,
-        createdAt: serverTimestamp(),
-      });
+      await saveUserWord({ userId, word, explanation });
     } catch (e) {
       console.error("保存に失敗しました:", e);
     }
@@ -90,13 +61,11 @@ export default function Search() {
         onChange={(e) => setWord(e.target.value)}
       />
 
-      <Button
-        onClick={handleGenerate}
-        disabled={loading}
-      >
+      <Button onClick={handleGenerate} disabled={loading || !userId}>
         {loading ? "生成中..." : "AIで説明を生成する"}
       </Button>
 
+      {/* 生成結果 */}
       {showResult && result && (
         <div className="mt-6 bg-gray-100 p-4 rounded relative">
           <div className="flex justify-between items-start mb-2">
@@ -113,12 +82,25 @@ export default function Search() {
         </div>
       )}
 
+      {/* 履歴一覧 */}
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-3">これまで調べた単語</h2>
-        {histories.length === 0 && (
+
+        {historiesLoading && (
+          <p className="text-gray-500 text-sm">読み込み中...</p>
+        )}
+
+        {error && (
+          <p className="text-red-500 text-sm">
+            履歴の取得に失敗しました。
+          </p>
+        )}
+
+        {!historiesLoading && histories.length === 0 && !error && (
           <p className="text-gray-500 text-sm">まだ履歴がありません。</p>
         )}
-        <ul className="space-y-3 max-h-80 overflow-y-auto">
+
+        <ul className="space-y-3 max-h-100 overflow-y-auto">
           {histories.map((item) => (
             <li
               key={item.id}
