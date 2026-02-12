@@ -23,9 +23,9 @@ export function useUserWordHistories(userId) {
     let firstSnapshot = true; 
 
     const q = query(
-      collection(db, "useWords"),
+      collection(db, "userWords"),
       where("userId", "==", userId),
-      orderBy("created_at", "desc")
+      orderBy("createdAt", "desc")
     );
 
     const unsubscribe = onSnapshot(
@@ -46,6 +46,7 @@ export function useUserWordHistories(userId) {
         setLoading(false);
       },
       (e) => {
+        console.error("🔥 Firestore error:", e);
         setError(e);
         setLoading(false);
       }
