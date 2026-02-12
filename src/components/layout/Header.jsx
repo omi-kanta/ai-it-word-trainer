@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Home, Search } from "lucide-react";
 
 export default function Header() {
   return (
@@ -13,24 +14,22 @@ export default function Header() {
               IT学習アプリ
             </span>
           </div>
+
           <nav className="flex items-center gap-2 text-xs sm:text-sm">
             <Link
               to="/home"
-              className="px-2 py-1 sm:px-3 text-gray-700 hover:text-blue-600"
+              className="inline-flex items-center gap-1.5 px-2 py-1 sm:px-3 text-gray-700 hover:text-blue-600"
             >
-              ホーム
+              <Home size={16} className="shrink-0" />
+              <span>ホーム</span>
             </Link>
+
             <Link
               to="/search"
-              className="px-2 py-1 sm:px-3 text-gray-700 hover:text-blue-600"
+              className="inline-flex items-center gap-1.5 px-2 py-1 sm:px-3 text-gray-700 hover:text-blue-600"
             >
-              検索
-            </Link>
-            <Link
-              to="/quiz"
-              className="px-2 py-1 sm:px-3 text-gray-700 hover:text-blue-600"
-            >
-              クイズ
+              <Search size={16} className="shrink-0" />
+              <span>検索</span>
             </Link>
           </nav>
         </div>

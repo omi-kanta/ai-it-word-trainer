@@ -1,32 +1,27 @@
 import { Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Header from "./Header";
+import Sidebar from "./Sidebar";
 
 export default function Layout() {
   const { user } = useAuth();
-
   const isLoggedIn = !!user;
+
+  // ログイン前はレイアウトを当てない（必要なら）
+  // if (!isLoggedIn) return <Outlet />;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col">
       {isLoggedIn && <Header />}
-      <div className="flex-1 flex justify-center">
-        <div className="w-full max-w-md">
-          {!isLoggedIn && (
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold">AI</span>
-                </div>
-              </div>
-              <h1 className="text-2xl font-bold mb-2">
-                IT学習アプリへようこそ
-              </h1>
-              <p className="text-gray-600">アカウントにログインしてください</p>
-            </div>
-          )}
+
+      {/* ここが余白を埋める：flex-1 */}
+      <div className="flex flex-1 min-h-0">    
+        {isLoggedIn && <Sidebar />}
+
+        {/* mainもスクロール領域になるように min-h-0 */}
+        <main className="flex-1 p-4 min-h-0 overflow-y-auto">
           <Outlet />
-        </div>
+        </main>
       </div>
 
       <footer className="py-4 text-center text-xs text-gray-600">
