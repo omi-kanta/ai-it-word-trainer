@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { generateQuiz } from "../lib/ai/quizGenerator";
+import { saveQuizSession } from "../lib/activityRepository";
+import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/ui/Button";
 import { Heading } from "../components/ui/Heading";
 import { HeadingDetail } from "../components/ui/HeadingDetail";
@@ -17,6 +19,9 @@ const QUIZ_TOPICS = [
 ];
 
 export default function Quiz() {
+  const { user } = useAuth();
+  const userId = user?.uid ?? null;
+
   // 現在選択中のトピック
   const [topic, setTopic] = useState(QUIZ_TOPICS[0]);
 
@@ -40,6 +45,11 @@ export default function Quiz() {
       setError(result);
     } else {
       setQuizText(result);
+      try {
+        await saveQuizSession({ userId, topic });
+      } catch (e) {
+        console.error("クイズ記録に失敗しました:", e);
+      }
     }
 
     setLoading(false);
