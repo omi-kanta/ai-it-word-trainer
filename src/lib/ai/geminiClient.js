@@ -1,7 +1,7 @@
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 const baseUrl =
   `https://generativelanguage.googleapis.com/v1beta/models/` +
-  `gemini-2.0-flash:generateContent?key=${apiKey}`;
+  `gemini-2.5-flash:generateContent?key=${apiKey}`;
 
 export async function callGemini(prompt) {
   if (!apiKey) {
