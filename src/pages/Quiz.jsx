@@ -225,7 +225,6 @@ export default function Quiz() {
             type="text"
             value={inputWord}
             onChange={(e) => { setInputWord(e.target.value); setError(""); }}
-            onKeyDown={(e) => e.key === "Enter" && !loading && handleGenerate()}
             placeholder="例：API、クラウド、Git ..."
             className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
           />
