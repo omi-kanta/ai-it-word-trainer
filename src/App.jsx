@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Search from "./pages/Search";
 import Quiz from "./pages/Quiz";
 import Statistics from "./pages/Statistics";
+import Wordbook from "./pages/Wordbook";
 import AuthPage from "./pages/AuthPage";
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -47,6 +48,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Statistics />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/words"
+          element={
+            <ProtectedRoute>
+              <Wordbook />
             </ProtectedRoute>
           }
         />
