@@ -3,6 +3,7 @@ import Layout from "./components/layout/Layout";
 import Home from "./pages/Home";
 import Search from "./pages/Search";
 import Quiz from "./pages/Quiz";
+import Review from "./pages/Review";
 import Statistics from "./pages/Statistics";
 import Wordbook from "./pages/Wordbook";
 import AuthPage from "./pages/AuthPage";
@@ -40,6 +41,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Quiz />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/review"
+          element={
+            <ProtectedRoute>
+              <Review />
             </ProtectedRoute>
           }
         />

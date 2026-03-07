@@ -1,180 +1,20 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { BookOpen } from "lucide-react";
 import { generateQuiz } from "../lib/ai/quizGenerator";
+import { parseQuizText } from "../lib/ai/quizParser";
 import { saveQuizSession } from "../lib/activityRepository";
 import { useAuth } from "../context/AuthContext";
-import { Button } from "../components/ui/Button";
+import { useReviewList } from "../hooks/useReviewList";
 import { Heading } from "../components/ui/Heading";
 import { HeadingDetail } from "../components/ui/HeadingDetail";
 import { ErrorMessage } from "../components/ui/ErrorMessage";
+import { QuestionView } from "../components/quiz/QuestionView";
 
-// AI テキストを問題オブジェクトの配列に変換する
-function parseQuizText(text) {
-  const questions = [];
-  const blockRegex = /Q\d+:\s*\n([\s\S]*?)(?=Q\d+:|$)/g;
-  let m;
-  while ((m = blockRegex.exec(text)) !== null) {
-    const block = m[1];
-
-    const questionMatch = block.match(/^([\s\S]*?)選択肢:/);
-    const question = questionMatch ? questionMatch[1].trim() : "";
-
-    const choicesMatch = block.match(/選択肢:([\s\S]*?)正解:/);
-    const choicesText = choicesMatch ? choicesMatch[1].trim() : "";
-    const choices = {};
-    for (const line of choicesText.split("\n")) {
-      const cm = line.match(/^([A-D])\.\s*(.*)/);
-      if (cm) choices[cm[1]] = cm[2].trim();
-    }
-
-    const answerMatch = block.match(/正解:\s*\n?\s*([A-D])/);
-    const answer = answerMatch ? answerMatch[1] : "";
-
-    const explMatch = block.match(/解説:\s*\n?([\s\S]*?)$/);
-    const explanation = explMatch ? explMatch[1].trim() : "";
-
-    if (question && answer) {
-      questions.push({ question, choices, answer, explanation });
-    }
-  }
-  return questions;
-}
-
-// ---- 問題表示・回答コンポーネント ----
-function QuestionView({ question, total, index, onNext, onRetry }) {
-  const [selected, setSelected] = useState(null);
-  const [submitted, setSubmitted] = useState(false);
-
-  const isCorrect = submitted && selected === question.answer;
-  const isLast = index === total - 1;
-
-  const choiceClass = (letter) => {
-    const base = "w-full text-left px-4 py-3 rounded-lg border text-sm transition-colors ";
-    if (!submitted) {
-      return base + (selected === letter
-        ? "border-indigo-400 bg-indigo-50 text-indigo-700"
-        : "border-gray-200 bg-white text-gray-700 hover:border-indigo-300 hover:bg-indigo-50");
-    }
-    if (letter === question.answer) return base + "border-green-400 bg-green-50 text-green-700";
-    if (letter === selected)        return base + "border-red-300 bg-red-50 text-red-700";
-    return base + "border-gray-200 bg-white text-gray-400";
-  };
-
-  return (
-    <div className="space-y-4">
-      <p className="text-sm text-gray-500">{index + 1} / {total} 問目</p>
-
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
-        <p className="text-sm font-medium text-gray-800 leading-relaxed whitespace-pre-wrap">
-          {question.question}
-        </p>
-
-        <div className="space-y-2">
-          {["A", "B", "C", "D"].map((letter) => {
-            const choice = question.choices[letter];
-            if (!choice) return null;
-            return (
-              <button
-                key={letter}
-                className={choiceClass(letter)}
-                onClick={() => !submitted && setSelected(letter)}
-                disabled={submitted}
-              >
-                <span className="font-semibold mr-2">{letter}.</span>
-                {choice}
-              </button>
-            );
-          })}
-        </div>
-
-        {!submitted && (
-          <Button onClick={() => setSubmitted(true)} disabled={!selected}>
-            回答する
-          </Button>
-        )}
-
-        {submitted && (
-          <div className="space-y-3 pt-1 border-t border-gray-100">
-            {isCorrect ? (
-              <p className="text-green-600 font-semibold">✅ 正解！</p>
-            ) : (
-              <p className="text-red-500 font-semibold">
-                ❌ 不正解（正解は {question.answer} です）
-              </p>
-            )}
-
-            {question.explanation && (
-              <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 leading-relaxed">
-                <p className="text-xs font-semibold text-gray-400 mb-1">解説</p>
-                <p className="whitespace-pre-wrap">{question.explanation}</p>
-              </div>
-            )}
-
-            <div className="flex gap-2 flex-wrap pt-1">
-              {!isLast && (
-                <Button onClick={onNext}>次の問題へ</Button>
-              )}
-              <button
-                onClick={onRetry}
-                className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                もう一度試す
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ---- 復習モード ----
-function ReviewMode({ reviewList, onBack }) {
-  return (
-    <div className="p-4 md:p-6 max-w-xl mx-auto space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <Heading>復習</Heading>
-          <HeadingDetail>出題された問題の解説を確認しましょう</HeadingDetail>
-        </div>
-        <button
-          onClick={onBack}
-          className="px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shrink-0"
-        >
-          クイズに戻る
-        </button>
-      </div>
-
-      {reviewList.length === 0 ? (
-        <p className="text-gray-400 text-sm text-center py-10">
-          まだ出題された問題がありません。
-        </p>
-      ) : (
-        <div className="space-y-3">
-          {reviewList.map((item, i) => (
-            <div
-              key={i}
-              className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-2"
-            >
-              <p className="text-lg font-bold text-gray-900">{item.word}</p>
-              <p className="text-sm font-medium text-indigo-700">{item.meaning}</p>
-              {item.explanation && (
-                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
-                  {item.explanation}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ---- メインページ ----
 export default function Quiz() {
   const { user } = useAuth();
   const userId = user?.uid ?? null;
+  const navigate = useNavigate();
 
   const [inputWord, setInputWord] = useState("");
   const [loading, setLoading] = useState(false);
@@ -182,10 +22,7 @@ export default function Quiz() {
   const [questions, setQuestions] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
 
-  // 復習リスト：{ word, meaning, explanation }
-  // meaning = 正解の選択肢テキスト（語彙カードとして自然な形）
-  const [reviewList, setReviewList] = useState([]);
-  const [showReview, setShowReview] = useState(false);
+  const { reviewList, addWord, recordResult } = useReviewList();
 
   const handleGenerate = async () => {
     const word = inputWord.trim();
@@ -209,15 +46,13 @@ export default function Quiz() {
       } else {
         setQuestions(parsed);
 
-        // 同じ単語が復習リストになければ追加
-        setReviewList((prev) => {
-          if (prev.some((r) => r.word === word)) return prev;
-          const newItems = parsed.map((q) => ({
-            word,
+        // 復習リストへ追加（word で重複チェック、3問まとめて1件）
+        addWord({
+          word,
+          items: parsed.map((q) => ({
             meaning: q.choices[q.answer] ?? q.answer,
             explanation: q.explanation,
-          }));
-          return [...prev, ...newItems];
+          })),
         });
 
         try {
@@ -236,10 +71,9 @@ export default function Quiz() {
     setError("");
   };
 
-  // ---- 復習モード ----
-  if (showReview) {
-    return <ReviewMode reviewList={reviewList} onBack={() => setShowReview(false)} />;
-  }
+  const handleAnswer = (isCorrect) => {
+    recordResult(inputWord.trim(), isCorrect);
+  };
 
   // ---- 問題表示中 ----
   if (questions.length > 0) {
@@ -256,6 +90,7 @@ export default function Quiz() {
           index={currentIdx}
           onNext={() => setCurrentIdx((i) => i + 1)}
           onRetry={handleRetry}
+          onAnswer={handleAnswer}
         />
       </div>
     );
@@ -270,7 +105,7 @@ export default function Quiz() {
           <HeadingDetail>単語を入力してクイズに挑戦しましょう</HeadingDetail>
         </div>
         <button
-          onClick={() => setShowReview(true)}
+          onClick={() => navigate("/review")}
           className="flex items-center gap-1.5 px-3 py-2 text-sm text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors shrink-0 mt-1"
         >
           <BookOpen size={14} />
